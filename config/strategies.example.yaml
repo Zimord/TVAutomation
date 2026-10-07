@@ -1,0 +1,45 @@
+# Risk limits and per-strategy settings.
+# Copy to config/strategies.yaml and edit. Restart the service to apply changes.
+#
+# All USD amounts are NOTIONAL position value in USDT (not margin).
+# Effective limits are the stricter of the global `risk` section and the strategy.
+
+risk:
+  # Global symbol whitelist (Bybit USDT perpetual symbols, without TradingView's ".P").
+  allowed_symbols: [BTCUSDT, ETHUSDT, SOLUSDT]
+
+  # Highest leverage any order may use.
+  max_leverage: 5
+
+  # Max number of symbols with an open position at the same time.
+  max_open_positions: 3
+
+  # New entries are rejected once today's PnL (UTC day) is at or below -this.
+  # Today's PnL = realized closed PnL since 00:00 UTC + current unrealized PnL.
+  max_daily_loss_usd: 250
+  include_unrealized_pnl_in_daily_loss: true
+
+  # Max notional per symbol (existing position + new order), per side.
+  max_position_usd:
+    default: 1000
+    BTCUSDT: 2500
+
+strategies:
+  btc-trend-v1:
+    enabled: true
+    allowed_symbols: [BTCUSDT]
+    # Used when the alert has no "size".
+    default_size: {mode: usd, value: 100}        # usd | percent_equity | qty
+    default_leverage: 2                          # applied before each entry; omit to leave Bybit's setting
+    max_leverage: 3
+    max_position_usd: 1000
+    stop_loss_pct: 2.0                           # used when the alert has no stop_loss
+    take_profit_pct: 4.0                         # used when the alert has no take_profit
+    # Buying while short (or selling while long) first closes the opposite position.
+    close_opposite_on_entry: true
+
+  eth-meanrev:
+    enabled: false
+    allowed_symbols: [ETHUSDT]
+    default_size: {mode: percent_equity, value: 5}   # 5% of equity, as notional
+    default_leverage: 1

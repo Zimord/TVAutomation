@@ -1,0 +1,29 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# Caddy obtains and renews a Let's Encrypt certificate for this domain automatically.
+# Ports 80 and 443 must be reachable from the internet for that to work.
+{$DOMAIN} {
+	# TradingView alerts are tiny; refuse large bodies before they reach the app.
+	request_body {
+		max_size 64KB
+	}
+
+	# Caddy replaces any client-supplied X-Forwarded-For with the real peer IP,
+	# which the app uses for the TradingView IP allowlist.
+	reverse_proxy app:8000
+
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
+
+	# Access logs. Request bodies are never logged; the Authorization header is redacted by Caddy.
+	log {
+		output stdout
+		format json
+	}
+}

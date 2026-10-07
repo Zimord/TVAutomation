@@ -1,0 +1,15 @@
+[project]
+name = "tv-bybit-bot"
+version = "0.1.0"
+description = "Self-hosted TradingView webhook -> Bybit V5 order execution service"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+filterwarnings = ["error::pytest.PytestUnraisableExceptionWarning"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py312"

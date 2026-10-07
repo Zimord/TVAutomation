@@ -1,0 +1,55 @@
+name: tvbot
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  app:
+    build: .
+    image: tvbot:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Only Caddy (on this network) may set X-Forwarded-For.
+      TRUSTED_PROXIES: 172.30.0.0/24
+    volumes:
+      - app-data:/app/data
+      - ./config:/app/config:ro
+    expose:
+      - "8000" # internal only. Never publish this port: the IP allowlist relies on traffic coming through Caddy.
+    networks:
+      - tvnet
+    logging: *logging
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - tvnet
+    logging: *logging
+
+networks:
+  tvnet:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,12 @@
+.env
+data/
+config/strategies.yaml
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.db
+*.db-wal
+*.db-shm
